@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager - مدیر وظایف</title>
+    <style>
+        :root {
+            --primary-color: #4285f4;
+            --secondary-color: #34a853;
+            --danger-color: #ea4335;
+            --warning-color: #fbbc05;
+            --light-gray: #f8f9fa;
+            --dark-gray: #5f6368;
+            --border-color: #dadce0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #202124;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .login-container {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            max-width: 400px;
+            margin: 20px auto;
+        }
+        
+        .task-form {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
+        }
+        
+        button:hover {
+            background-color: #3367d6;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+        }
+        
+        .btn-danger:hover {
+            background-color: #d33426;
+        }
+        
+        .btn-success {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn-success:hover {
+            background-color: #2d9246;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: #000;
+        }
+        
+        .btn-warning:hover {
+            background-color: #e6a700;
+        }
+        
+        .tasks-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .task-card {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+            transition: transform 0.2s;
+        }
+        
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .parent-task {
+            background-color: var(--light-gray);
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .subtask {
+            margin-right: 30px;
+            background-color: white;
+            border-left: 4px solid var(--dark-gray);
+        }
+        
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        
+        .task-title {
+            font-weight: 600;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        
+        .task-description {
+            color: var(--dark-gray);
+            margin-bottom: 10px;
+        }
+        
+        .task-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: var(--dark-gray);
+            margin-bottom: 10px;
+        }
+        
+        .task-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .task-actions button {
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-pending {
+            background-color: var(--warning-color);
+            color: #000;
+        }
+        
+        .status-in-progress {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .status-completed {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: var(--dark-gray);
+        }
+        
+        .subtask-form {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: var(--light-gray);
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .subtasks-container {
+            margin-top: 15px;
+        }
+        
+        .priority-high {
+            border-left-color: var(--danger-color);
+        }
+        
+        .priority-medium {
+            border-left-color: var(--warning-color);
+        }
+        
+        .priority-low {
+            border-left-color: var(--secondary-color);
+        }
+        
+        .user-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .logout-btn {
+            background-color: var(--dark-gray);
+        }
+        
+        .logout-btn:hover {
+            background-color: #4a4a4a;
+        }
+        
+        .drag-handle {
+            cursor: move;
+            color: var(--dark-gray);
+            margin-left: 10px;
+            font-size: 18px;
+        }
+        
+        .task-content {
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .task-order-controls {
+            display: flex;
+            flex-direction: column;
+            margin-left: 10px;
+            gap: 5px;
+        }
+        
+        .order-btn {
+            padding: 2px 8px;
+            font-size: 12px;
+            background-color: var(--dark-gray);
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- بخش لاگین -->
+        <div id="loginSection" class="login-container">
+            <h2>ورود به سیستم</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">نام کاربری</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">رمز عبور</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit">ورود</button>
+            </form>
+            <div id="loginError" style="color: red; margin-top: 10px; display: none;">
+                نام کاربری یا رمز عبور اشتباه است
+            </div>
+        </div>
+
+        <!-- بخش اصلی برنامه (پس از لاگین) -->
+        <div id="appSection" class="hidden">
+            <div class="user-section">
+                <div>
+                    <h2>خوش آمدید، <span id="userName">مدیر</span>!</h2>
+                    <small>وضعیت: <span id="syncStatus">همگام‌سازی با سرور</span></small>
+                </div>
+                <button class="logout-btn" onclick="logout()">خروج</button>
+            </div>
+            
+            <header>
+                <h1>مدیریت وظایف - Task Manager</h1>
+                <p>مدیریت کارها به سبک Google Tasks با قابلیت ذخیره‌سازی ابری</p>
+            </header>
+            
+            <div class="task-form">
+                <h2>ایجاد وظیفه جدید</h2>
+                <form id="taskForm">
+                    <div class="form-group">
+                        <label for="taskTitle">عنوان وظیفه *</label>
+                        <input type="text" id="taskTitle" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="taskDescription">توضیحات</label>
+                        <textarea id="taskDescription"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="taskPriority">اولویت</label>
+                        <select id="taskPriority">
+                            <option value="low">کم</option>
+                            <option value="medium" selected>متوسط</option>
+                            <option value="high">بالا</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="parentTask">وظیفه والد (اختیاری)</label>
+                        <select id="parentTask">
+                            <option value="">بدون والد (وظیفه اصلی)</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit">ذخیره وظیفه</button>
+                </form>
+            </div>
+            
+            <div class="tasks-container">
+                <h2>لیست وظایف</h2>
+                <div id="tasksList">
+                    <!-- وظایف در اینجا نمایش داده می‌شوند -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // دیتابیس شبیه‌سازی شده
+        class Database {
+            constructor() {
+                this.users = [
+                    { id: 1, username: 'admin', password: '12345', name: 'مدیر سیستم' }
+                ];
+                
+                this.tasks = JSON.parse(localStorage.getItem('cloud_tasks')) || [];
+                this.currentUser = null;
+            }
+            
+            // احراز هویت کاربر
+            authenticate(username, password) {
+                const user = this.users.find(u => 
+                    u.username === username && u.password === password
+                );
+                
+                if (user) {
+                    this.currentUser = user;
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    return true;
+                }
+                return false;
+            }
+            
+            // دریافت تسک‌های کاربر
+            getUserTasks() {
+                return this.tasks.filter(task => task.userId === this.currentUser.id);
+            }
+            
+            // ذخیره تسک
+            saveTask(task) {
+                task.userId = this.currentUser.id;
+                
+                if (task.id) {
+                    // به‌روزرسانی تسک موجود
+                    const index = this.tasks.findIndex(t => t.id === task.id);
+                    if (index !== -1) {
+                        this.tasks[index] = task;
+                    }
+                } else {
+                    // ایجاد تسک جدید
+                    task.id = this.generateId();
+                    task.order = this.getNextOrder();
+                    this.tasks.push(task);
+                }
+                
+                this.saveToStorage();
+                return task;
+            }
+            
+            // حذف تسک
+            deleteTask(taskId) {
+                const deleteRecursive = (id) => {
+                    this.tasks = this.tasks.filter(t => t.id !== id);
+                    const subtasks = this.tasks.filter(t => t.parentId === id);
+                    subtasks.forEach(st => deleteRecursive(st.id));
+                };
+                
+                deleteRecursive(taskId);
+                this.saveToStorage();
+            }
+            
+            // تغییر ترتیب تسک
+            moveTask(taskId, direction) {
+                const task = this.tasks.find(t => t.id === taskId);
+                if (!task || task.parentId) return; // فقط تسک‌های اصلی قابل جابجایی هستند
+                
+                const userTasks = this.getUserTasks().filter(t => !t.parentId);
+                const currentIndex = userTasks.findIndex(t => t.id === taskId);
+                
+                if (direction === 'up' && currentIndex > 0) {
+                    // جابجایی با تسک بالایی
+                    const tempOrder = userTasks[currentIndex].order;
+                    userTasks[currentIndex].order = userTasks[currentIndex - 1].order;
+                    userTasks[currentIndex - 1].order = tempOrder;
+                } else if (direction === 'down' && currentIndex < userTasks.length - 1) {
+                    // جابجایی با تسک پایینی
+                    const tempOrder = userTasks[currentIndex].order;
+                    userTasks[currentIndex].order = userTasks[currentIndex + 1].order;
+                    userTasks[currentIndex + 1].order = tempOrder;
+                }
+                
+                this.saveToStorage();
+            }
+            
+            // تولید ID منحصر به فرد
+            generateId() {
+                return Date.now() + Math.floor(Math.random() * 1000);
+            }
+            
+            // دریافت ترتیب بعدی
+            getNextOrder() {
+                const userTasks = this.getUserTasks().filter(t => !t.parentId);
+                if (userTasks.length === 0) return 0;
+                return Math.max(...userTasks.map(t => t.order)) + 1;
+            }
+            
+            // ذخیره در localStorage
+            saveToStorage() {
+                localStorage.setItem('cloud_tasks', JSON.stringify(this.tasks));
+            }
+            
+            // خروج کاربر
+            logout() {
+                this.currentUser = null;
+                localStorage.removeItem('currentUser');
+            }
+            
+            // بررسی لاگین بودن کاربر
+            isLoggedIn() {
+                const savedUser = localStorage.getItem('currentUser');
+                if (savedUser) {
+                    this.currentUser = JSON.parse(savedUser);
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        // ایجاد نمونه دیتابیس
+        const db = new Database();
+
+        // مدیریت وضعیت برنامه
+        const state = {
+            tasks: []
+        };
+
+        // راه‌اندازی اولیه
+        document.addEventListener('DOMContentLoaded', function() {
+            if (db.isLoggedIn()) {
+                showApp();
+            } else {
+                showLogin();
+            }
+        });
+
+        // نمایش بخش لاگین
+        function showLogin() {
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('appSection').classList.add('hidden');
+        }
+
+        // نمایش بخش اصلی برنامه
+        function showApp() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('appSection').classList.remove('hidden');
+            document.getElementById('userName').textContent = db.currentUser.name;
+            loadTasks();
+        }
+
+        // مدیریت فرم لاگین
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (db.authenticate(username, password)) {
+                showApp();
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        });
+
+        // خروج از سیستم
+        function logout() {
+            db.logout();
+            showLogin();
+            document.getElementById('loginForm').reset();
+            document.getElementById('loginError').style.display = 'none';
+        }
+
+        // بارگذاری تسک‌ها
+        function loadTasks() {
+            state.tasks = db.getUserTasks();
+            renderTasks();
+        }
+
+        // فرم ایجاد وظیفه
+        document.getElementById('taskForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('taskTitle').value;
+            const description = document.getElementById('taskDescription').value;
+            const priority = document.getElementById('taskPriority').value;
+            const parentId = document.getElementById('parentTask').value;
+            
+            if (!title.trim()) {
+                alert('لطفاً عنوان وظیفه را وارد کنید');
+                return;
+            }
+            
+            const newTask = {
+                title: title.trim(),
+                description: description.trim(),
+                priority: priority,
+                status: 'pending',
+                parentId: parentId ? parseInt(parentId) : null,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            
+            db.saveTask(newTask);
+            loadTasks();
+            
+            // ریست کردن فرم
+            document.getElementById('taskForm').reset();
+            updateParentTaskOptions();
+        });
+
+        // به‌روزرسانی گزینه‌های وظیفه والد
+        function updateParentTaskOptions() {
+            const parentTaskSelect = document.getElementById('parentTask');
+            const existingOptions = parentTaskSelect.querySelectorAll('option:not(:first-child)');
+            existingOptions.forEach(option => option.remove());
+            
+            state.tasks
+                .filter(task => !task.parentId)
+                .sort((a, b) => a.order - b.order)
+                .forEach(task => {
+                    const option = document.createElement('option');
+                    option.value = task.id;
+                    option.textContent = task.title;
+                    parentTaskSelect.appendChild(option);
+                });
+        }
+
+        // تغییر وضعیت وظیفه
+        function toggleTaskStatus(taskId) {
+            const task = state.tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            if (task.status === 'pending') {
+                task.status = 'in-progress';
+            } else if (task.status === 'in-progress') {
+                task.status = 'completed';
+            } else {
+                task.status = 'pending';
+            }
+            
+            task.updatedAt = new Date().toISOString();
+            db.saveTask(task);
+            loadTasks();
+        }
+
+        // حذف وظیفه
+        function deleteTask(taskId) {
+            if (!confirm('آیا از حذف این وظیفه اطمینان دارید؟')) return;
+            
+            db.deleteTask(taskId);
+            loadTasks();
+        }
+
+        // جابجایی تسک
+        function moveTask(taskId, direction) {
+            db.moveTask(taskId, direction);
+            loadTasks();
+        }
+
+        // نمایش تسک‌ها
+        function renderTasks() {
+            const tasksList = document.getElementById('tasksList');
+            
+            if (state.tasks.length === 0) {
+                tasksList.innerHTML = `
+                    <div class="empty-state">
+                        <p>هیچ وظیفه‌ای وجود ندارد. اولین وظیفه خود را ایجاد کنید!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // جدا کردن تسک‌های اصلی و زیرتسک‌ها
+            const parentTasks = state.tasks
+                .filter(task => !task.parentId)
+                .sort((a, b) => a.order - b.order);
+                
+            const subtasks = state.tasks.filter(task => task.parentId);
+            
+            tasksList.innerHTML = '';
+            
+            parentTasks.forEach(task => {
+                const taskElement = createTaskElement(task);
+                tasksList.appendChild(taskElement);
+                
+                // اضافه کردن زیرتسک‌ها
+                const taskSubtasks = subtasks.filter(st => st.parentId === task.id);
+                if (taskSubtasks.length > 0) {
+                    const subtasksContainer = document.createElement('div');
+                    subtasksContainer.className = 'subtasks-container';
+                    
+                    taskSubtasks.forEach(subtask => {
+                        const subtaskElement = createTaskElement(subtask, true);
+                        subtasksContainer.appendChild(subtaskElement);
+                    });
+                    
+                    tasksList.appendChild(subtasksContainer);
+                }
+            });
+            
+            updateParentTaskOptions();
+        }
+
+        // ایجاد المان تسک
+        function createTaskElement(task, isSubtask = false) {
+            const taskElement = document.createElement('div');
+            taskElement.className = `task-card ${isSubtask ? 'subtask' : 'parent-task'} priority-${task.priority}`;
+            taskElement.dataset.id = task.id;
+            
+            const statusText = {
+                'pending': 'در انتظار',
+                'in-progress': 'در حال انجام',
+                'completed': 'انجام شده'
+            };
+            
+            const priorityText = {
+                'low': 'کم',
+                'medium': 'متوسط',
+                'high': 'بالا'
+            };
+            
+            const orderControls = !isSubtask ? `
+                <div class="task-order-controls">
+                    <button class="order-btn btn-warning" onclick="moveTask(${task.id}, 'up')">↑</button>
+                    <button class="order-btn btn-warning" onclick="moveTask(${task.id}, 'down')">↓</button>
+                </div>
+            ` : '';
+            
+            taskElement.innerHTML = `
+                <div class="task-content">
+                    <div style="flex: 1;">
+                        <div class="task-header">
+                            <div>
+                                <div class="task-title">${escapeHtml(task.title)}</div>
+                                ${task.description ? `<div class="task-description">${escapeHtml(task.description)}</div>` : ''}
+                            </div>
+                            <span class="status-badge status-${task.status}">${statusText[task.status]}</span>
+                        </div>
+                        
+                        <div class="task-meta">
+                            <span>اولویت: ${priorityText[task.priority]}</span>
+                            <span>تاریخ ایجاد: ${new Date(task.createdAt).toLocaleDateString('fa-IR')}</span>
+                        </div>
+                        
+                        <div class="task-actions">
+                            <button onclick="toggleTaskStatus(${task.id})" class="btn-success">تغییر وضعیت</button>
+                            ${!isSubtask ? `<button onclick="showAddSubtaskForm(${task.id})">افزودن زیروظیفه</button>` : ''}
+                            <button onclick="deleteTask(${task.id})" class="btn-danger">حذف</button>
+                        </div>
+                    </div>
+                    ${orderControls}
+                </div>
+            `;
+            
+            return taskElement;
+        }
+
+        // نمایش فرم افزودن زیروظیفه
+        function showAddSubtaskForm(parentId) {
+            const existingForms = document.querySelectorAll('.subtask-form');
+            existingForms.forEach(form => form.remove());
+            
+            const parentTask = document.querySelector(`.task-card[data-id="${parentId}"]`);
+            if (!parentTask) return;
+            
+            const form = document.createElement('div');
+            form.className = 'subtask-form';
+            form.innerHTML = `
+                <h4>افزودن زیروظیفه</h4>
+                <form onsubmit="addSubtask(event, ${parentId})">
+                    <div class="form-group">
+                        <input type="text" placeholder="عنوان زیروظیفه" required>
+                    </div>
+                    <div class="form-group">
+                        <textarea placeholder="توضیحات (اختیاری)"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <select>
+                            <option value="low">اولویت کم</option>
+                            <option value="medium" selected>اولویت متوسط</option>
+                            <option value="high">اولویت بالا</option>
+                        </select>
+                    </div>
+                    <div class="task-actions">
+                        <button type="submit" class="btn-success">ذخیره</button>
+                        <button type="button" onclick="this.parentElement.parentElement.parentElement.remove()">انصراف</button>
+                    </div>
+                </form>
+            `;
+            
+            parentTask.appendChild(form);
+            form.style.display = 'block';
+        }
+
+        // افزودن زیروظیفه
+        function addSubtask(e, parentId) {
+            e.preventDefault();
+            
+            const form = e.target;
+            const title = form.querySelector('input').value;
+            const description = form.querySelector('textarea').value;
+            const priority = form.querySelector('select').value;
+            
+            if (!title.trim()) {
+                alert('لطفاً عنوان زیروظیفه را وارد کنید');
+                return;
+            }
+            
+            const newSubtask = {
+                title: title.trim(),
+                description: description.trim(),
+                priority: priority,
+                status: 'pending',
+                parentId: parentId,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            
+            db.saveTask(newSubtask);
+            loadTasks();
+        }
+
+        // جلوگیری از XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
